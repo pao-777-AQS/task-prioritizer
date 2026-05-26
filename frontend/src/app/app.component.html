@@ -1,0 +1,70 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-content">
+      <h1>🎯 Priorizador de Tareas</h1>
+      <button class="btn-add" (click)="showForm = !showForm">
+        {{ showForm ? '✕ Cancelar' : '+ Nueva tarea' }}
+      </button>
+    </div>
+    <div class="stats-bar">
+      <div class="stat red"><span class="num">{{ counts.alto }}</span> Alto</div>
+      <div class="stat amber"><span class="num">{{ counts.medio }}</span> Medio</div>
+      <div class="stat green"><span class="num">{{ counts.bajo }}</span> Bajo</div>
+      <div class="stat gray"><span class="num">{{ counts.completadas }}/{{ counts.total }}</span> Completadas</div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <div class="tasks-panel">
+      <div *ngIf="showForm" class="task-form">
+        <h3>Nueva tarea</h3>
+        <input [(ngModel)]="newTask.title" placeholder="Título de la tarea" />
+        <textarea [(ngModel)]="newTask.description" placeholder="Descripción (opcional)" rows="2"></textarea>
+        <select [(ngModel)]="newTask.priority">
+          <option value="alto">🔴 Alto</option>
+          <option value="medio">🟡 Medio</option>
+          <option value="bajo">🟢 Bajo</option>
+        </select>
+        <button class="btn-save" (click)="saveTask()">Guardar tarea</button>
+      </div>
+
+      <div class="filter-bar">
+        <button [class.active]="filterPriority==='todos'" (click)="filterPriority='todos'; applyFilter()">Todos</button>
+        <button [class.active]="filterPriority==='alto'" (click)="filterPriority='alto'; applyFilter()">🔴 Alto</button>
+        <button [class.active]="filterPriority==='medio'" (click)="filterPriority='medio'; applyFilter()">🟡 Medio</button>
+        <button [class.active]="filterPriority==='bajo'" (click)="filterPriority='bajo'; applyFilter()">🟢 Bajo</button>
+      </div>
+
+      <div class="task-list">
+        <div *ngFor="let task of filteredTasks" class="task-card" [class.done]="task.completed" [class.priority-alto]="task.priority==='alto'" [class.priority-medio]="task.priority==='medio'" [class.priority-bajo]="task.priority==='bajo'">
+          <div class="task-main">
+            <input type="checkbox" [checked]="task.completed" (change)="toggleComplete(task)" />
+            <div class="task-info">
+              <h4>{{ task.title }}</h4>
+              <p *ngIf="task.description">{{ task.description }}</p>
+            </div>
+          </div>
+          <div class="task-meta">
+            <span class="badge" [class.badge-alto]="task.priority==='alto'" [class.badge-medio]="task.priority==='medio'" [class.badge-bajo]="task.priority==='bajo'">
+              {{ task.priority | titlecase }}
+            </span>
+            <button class="btn-delete" (click)="deleteTask(task._id!)">🗑</button>
+          </div>
+        </div>
+        <div *ngIf="filteredTasks.length === 0" class="empty-state">
+          No hay tareas. ¡Agrega una! 🎉
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <h3>📊 Distribución por urgencia</h3>
+      <canvas #priorityChart></canvas>
+      <div class="chart-legend">
+        <div class="legend-item"><span class="dot red"></span> Alto: {{ counts.alto }}</div>
+        <div class="legend-item"><span class="dot amber"></span> Medio: {{ counts.medio }}</div>
+        <div class="legend-item"><span class="dot green"></span> Bajo: {{ counts.bajo }}</div>
+      </div>
+    </div>
+  </div>
+</div>
